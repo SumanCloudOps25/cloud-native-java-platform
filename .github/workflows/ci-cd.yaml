@@ -38,6 +38,18 @@ jobs:
     - name: Verify JAR
       run: dir app\\target
 
+    - name: SonarQube Scan
+      working-directory: app
+      shell: powershell
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        mvn sonar:sonar `
+        -Dsonar.projectKey=cloud-native-java-platform `
+        -Dsonar.host.url=http://localhost:9000 `
+        -Dsonar.token=$env:SONAR_TOKEN
+    
+
     - name: Build Docker Image
       working-directory: app
       run: docker build -t cloud-native-java-app:v1 .
