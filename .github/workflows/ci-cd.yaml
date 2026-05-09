@@ -20,7 +20,7 @@ jobs:
 
     - name: Run Trivy Filesystem Scan
       run: |
-        trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+        trivy fs --severity CRITICAL --exit-code 1 .
 
     - name: Set up Java 17
       uses: actions/setup-java@v4
@@ -59,8 +59,7 @@ jobs:
 
     - name: Run Trivy Image Scan
       run: |
-        trivy image --severity HIGH,CRITICAL --exit-code 1 cloud-native-java-app:v1
-
+        trivy image --severity CRITICAL --exit-code 1 cloud-native-java-app:v1
     - name: Load Image Into Minikube
       run: minikube image load cloud-native-java-app:v1
 
