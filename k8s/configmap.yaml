@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: java-app-config
+  namespace: java-app
+
+data:
+  APP_ENV: "dev"
+  LOG_LEVEL: "INFO"
