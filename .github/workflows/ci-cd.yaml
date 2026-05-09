@@ -55,7 +55,8 @@ jobs:
 
     - name: Run Trivy Image Scan
       run: |
-        trivy image --severity CRITICAL --exit-code 1 cloud-native-java-app:v1
+        trivy image --timeout 15m --severity CRITICAL --exit-code 1 cloud-native-java-app:v1
+        
     - name: Load Image Into Minikube
       run: minikube image load cloud-native-java-app:v1
 
