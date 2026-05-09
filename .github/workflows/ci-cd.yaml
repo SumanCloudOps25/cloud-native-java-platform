@@ -51,15 +51,24 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        Start-Sleep -Seconds 20
+        Write-Host "Waiting for SonarQube analysis..."
+        Start-Sleep -Seconds 40
+
+        $pair = "$env:SONAR_TOKEN:"
+        $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pair))
 
         $headers = @{
-          Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$env:SONAR_TOKEN:"))
+          Authorization = "Basic $encodedCreds"
         }
 
+        $url = "http://localhost:9000/api/qualitygates/project_status?projectKey=demo"
+
+        Write-Host "Calling SonarQube API..."
+
         $response = Invoke-RestMethod `
-          -Uri "http://localhost:9000/api/qualitygates/project_status?projectKey=cloud-native-java-platform" `
-          -Headers $headers
+          -Uri $url `
+          -Headers $headers `
+          -Method Get
 
         $status = $response.projectStatus.status
 
@@ -99,3 +108,24 @@ jobs:
       
     - name: Verify Pods
       run: kubectl get pods -n java-app
+
+    - name: Start Minikube Service
+      shell: powershell
+      run: |
+        $serviceUrl = minikube service java-app-service -n java-app --url
+        echo "SERVICE_URL=$serviceUrl" >> $env:GITHUB_ENV
+
+    - name: OWASP ZAP Baseline Scan
+      run: |
+        docker run --rm `
+          -v ${PWD}:/zap/wrk/:rw `
+          ghcr.io/zaproxy/zaproxy:stable `
+          zap-baseline.py `
+          -t $env:SERVICE_URL `
+          -r zap-report.html
+
+    - name: Upload ZAP Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: zap-report
+        path: zap-report.html
