@@ -46,6 +46,30 @@ jobs:
       run: |
         mvn sonar:sonar "-Dsonar.projectKey=cloud-native-java-platform" "-Dsonar.host.url=http://localhost:9000" "-Dsonar.token=$env:SONAR_TOKEN"
 
+    - name: SonarQube Quality Gate Check
+      shell: powershell
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        Start-Sleep -Seconds 20
+
+        $headers = @{
+          Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$env:SONAR_TOKEN:"))
+        }
+
+        $response = Invoke-RestMethod `
+          -Uri "http://localhost:9000/api/qualitygates/project_status?projectKey=cloud-native-java-platform" `
+          -Headers $headers
+
+        $status = $response.projectStatus.status
+
+        Write-Host "Quality Gate Status: $status"
+
+        if ($status -ne "OK") {
+          Write-Error "Quality Gate Failed!"
+          exit 1
+        }
+
     - name: Build Docker Image
       working-directory: app
       run: docker build -t cloud-native-java-app:v1 .
