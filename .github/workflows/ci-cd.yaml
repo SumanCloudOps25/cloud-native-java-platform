@@ -77,11 +77,12 @@ jobs:
     - name: Verify Pods
       run: kubectl get pods -n java-app
 
-    - name: Start Minikube Service
+    - name: Port Forward Application
       shell: powershell
       run: |
-        $serviceUrl = minikube service java-app-service -n java-app --url
-        echo "SERVICE_URL=$serviceUrl" >> $env:GITHUB_ENV
+        Start-Process powershell -ArgumentList "kubectl port-forward svc/java-app-service 8085:80 -n java-app"
+
+        Start-Sleep -Seconds 15
 
     - name: OWASP ZAP Baseline Scan
       run: |
@@ -89,7 +90,7 @@ jobs:
           -v ${PWD}:/zap/wrk/:rw `
           ghcr.io/zaproxy/zaproxy:stable `
           zap-baseline.py `
-          -t $env:SERVICE_URL `
+          -t http://host.docker.internal:8085 `
           -r zap-report.html
 
     - name: Upload ZAP Report
