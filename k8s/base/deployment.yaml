@@ -18,6 +18,9 @@ spec:
         app: java-app
 
     spec:
+      securityContext:
+        fsGroup: 1000
+
       containers:
       - name: java-app
 
@@ -42,6 +45,16 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+
+          capabilities:
+            drop:
+              - ALL
 
         livenessProbe:
           httpGet:
