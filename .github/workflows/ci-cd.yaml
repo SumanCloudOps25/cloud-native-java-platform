@@ -56,7 +56,7 @@ jobs:
     - name: Run Trivy Image Scan
       run: |
         trivy image --timeout 15m --severity CRITICAL --exit-code 1 cloud-native-java-app:v1
-        
+
     - name: Load Image Into Minikube
       run: minikube image load cloud-native-java-app:v1
 
@@ -65,7 +65,7 @@ jobs:
         trivy config --severity HIGH,CRITICAL --exit-code 1 k8s/
 
     - name: Deploy To Kubernetes
-      run: kubectl apply -f k8s/
+      run: kubectl apply -f k8s/base/
 
     - name: Restart Deployment
       run: kubectl rollout restart deployment java-app -n java-app
