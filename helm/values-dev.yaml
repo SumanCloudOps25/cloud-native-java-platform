@@ -1,0 +1,9 @@
+replicaCount: 1
+
+image:
+  repository: cloud-native-java-app
+  tag: dev-latest
+
+env:
+  APP_ENV: dev
+  LOG_LEVEL: DEBUG
