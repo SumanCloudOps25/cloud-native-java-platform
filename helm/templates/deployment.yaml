@@ -4,7 +4,7 @@ metadata:
   name: java-app
   namespace: java-app
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: { { .Values.replicaCount } }
   selector:
     matchLabels:
       app: java-app
@@ -20,11 +20,16 @@ spec:
             - containerPort: 8080
           env:
             - name: APP_ENV
-              value: {{ .Values.env.APP_ENV }}
+              value: { { .Values.env.APP_ENV } }
           resources:
             requests:
-              memory: {{ .Values.resources.requests.memory }}
-              cpu: {{ .Values.resources.requests.cpu }}
+              memory: { { .Values.resources.requests.memory } }
+              cpu: { { .Values.resources.requests.cpu } }
             limits:
-              memory: {{ .Values.resources.limits.memory }}
-              cpu: {{ .Values.resources.limits.cpu }}
+              memory: { { .Values.resources.limits.memory } }
+              cpu: { { .Values.resources.limits.cpu } }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false

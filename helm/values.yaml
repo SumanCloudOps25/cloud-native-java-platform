@@ -16,11 +16,7 @@ resources:
   limits:
     memory: "512Mi"
     cpu: "500m"
-securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        readOnlyRootFilesystem: true
-
+    
 env:
   APP_ENV: base
   LOG_LEVEL: INFO
