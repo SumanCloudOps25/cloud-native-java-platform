@@ -2,7 +2,8 @@ replicaCount: 1
 
 image:
   repository: cloud-native-java-app
-  tag: dev-latest
+  tag: ""   # leave empty, CI/CD will override
+  pullPolicy: IfNotPresent
 
 env:
   APP_ENV: dev

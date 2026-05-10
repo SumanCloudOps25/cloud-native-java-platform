@@ -49,7 +49,7 @@ jobs:
 
     - name: Build Docker Image
       working-directory: app
-      run: docker build -t cloud-native-java-app:v1 .
+      run: docker build -t cloud-native-java-app:${{ github.sha }} .
 
     - name: Verify Docker Image
       run: docker images
@@ -59,33 +59,47 @@ jobs:
         trivy image --timeout 15m --severity CRITICAL --exit-code 1 cloud-native-java-app:v1
 
     - name: Load Image Into Minikube
-      run: minikube image load cloud-native-java-app:v1
+      run: minikube image load cloud-native-java-app:${{ github.sha }}
 
-    - name: Run Trivy Kubernetes Scan
+    #- name: Run Trivy Kubernetes Scan
+    #  run: |
+    #    trivy config --severity HIGH,CRITICAL --exit-code 1 k8s/
+
+    - name: Run Trivy Helm Scan
       run: |
-        trivy config --severity HIGH,CRITICAL --exit-code 1 k8s/
+        trivy config --severity HIGH,CRITICAL --exit-code 1 . .helm/ .helm/templates
     
     #
     #- name: Deploy To Kubernetes
     #  run: kubectl apply -f k8s/base/
 
-    - name: Install Helm (Windows)
-      shell: powershell
+    #- name: Install Helm (Windows)
+    #  shell: powershell
+    #  run: |
+    #    choco install kubernetes-helm -y
+    #    helm version
+
+
+    - name: Deploy to Dev
+      if: github.ref == 'refs/heads/dev'
       run: |
-        choco install kubernetes-helm -y
-        helm version
+        helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-dev.yaml
 
-
-    - name: Deploy using Helm
+    - name: Deploy to Prod
+      if: github.ref == 'refs/heads/main'
       run: |
-        kubectl delete namespace java-app
-        helm upgrade --install java-app ./helm -n java-app --create-namespace -f helm/values.yaml    
+        helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-prod.yaml
 
-    - name: Restart Deployment
-      run: kubectl rollout restart deployment java-app -n java-app
+    - name: Verify Helm Release
+      run: |
+        helm list -n java-app
+        helm status java-app -n java-app    
 
-    - name: Verify Rollout
-      run: kubectl rollout status deployment java-app -n java-app
+    #- name: Restart Deployment
+    #  run: kubectl rollout restart deployment java-app -n java-app
+
+    #- name: Verify Rollout
+    #  run: kubectl rollout status deployment java-app -n java-app
       
     - name: Verify Pods
       run: kubectl get pods -n java-app
