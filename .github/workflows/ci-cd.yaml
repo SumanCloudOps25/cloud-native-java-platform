@@ -81,50 +81,50 @@ jobs:
 
     #ARGO CD STEPS
 
-    - name: Checkout GitHub Repo
-      uses: actions/checkout@v4
-      with:
-        repository: SumanCloudOps25/cloud-native-java-platform
-        token: ${{ secrets.GITOPS_TOKEN }}
+    #- name: Checkout GitHub Repo
+    #  uses: actions/checkout@v4
+    #  with:
+    #    repository: SumanCloudOps25/cloud-native-java-platform
+    #    token: ${{ secrets.GITOPS_TOKEN }}
 
-    - name: Update values files
-      shell: powershell
-      run: |
-        if ($env:GITHUB_REF -eq "refs/heads/dev") {
-          (Get-Content helm/values-dev.yaml) -replace 'tag:.*', "tag: $env:IMAGE_TAG" | Set-Content helm/values-dev.yaml
-        }
-        elseif ($env:GITHUB_REF -eq "refs/heads/main") {
-          (Get-Content helm/values-prod.yaml) -replace 'tag:.*', "tag: $env:IMAGE_TAG" | Set-Content helm/values-prod.yaml
-        }
+    #- name: Update values files
+    #  shell: powershell
+    #  run: |
+    #    if ($env:GITHUB_REF -eq "refs/heads/dev") {
+    #      (Get-Content helm/values-dev.yaml) -replace 'tag:.*', "tag: $env:IMAGE_TAG" | Set-Content helm/values-dev.yaml
+    #    }
+    #    elseif ($env:GITHUB_REF -eq "refs/heads/main") {
+    #      (Get-Content helm/values-prod.yaml) -replace 'tag:.*', "tag: $env:IMAGE_TAG" | Set-Content helm/values-prod.yaml
+    #    }
 
 
-    - name: Commit and Push Changes
-      run: |
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git add helm/values-*.yaml
-        git commit -m "Update image tag to $IMAGE_TAG"
-        git push
+    #- name: Commit and Push Changes
+    #  run: |
+    #    git config user.name "github-actions"
+    #    git config user.email "actions@github.com"
+    #    git add helm/values-*.yaml
+    #    git commit -m "Update image tag to $IMAGE_TAG"
+    #    git push
 
     # HELM STEPS
 
-    #- name: Deploy to Dev
-    #  if: github.ref == 'refs/heads/dev'
-    #  run: |
-    #    helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-dev.yaml
+    - name: Deploy to Dev
+      if: github.ref == 'refs/heads/dev'
+      run: |
+        helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-dev.yaml
 
-    #- name: Deploy to Prod
-    #  if: github.ref == 'refs/heads/main'
-    #  run: |
-    #    helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-prod.yaml
+    - name: Deploy to Prod
+      if: github.ref == 'refs/heads/main'
+      run: |
+        helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-prod.yaml
 
-    #- name: Verify Helm Release
-    #  run: |
-    #    helm list -n java-app
-    #    helm status java-app -n java-app    
+    - name: Verify Helm Release
+      run: |
+        helm list -n java-app
+        helm status java-app -n java-app    
 
     #- name: Restart Deployment
-    #  run: kubectl rollout restart deployment java-app -n java-app
+    # run: kubectl rollout restart deployment java-app -n java-app
 
     #- name: Verify Rollout
     #  run: kubectl rollout status deployment java-app -n java-app
