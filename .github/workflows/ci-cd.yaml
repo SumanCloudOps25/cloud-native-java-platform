@@ -87,7 +87,7 @@ jobs:
         repository: SumanCloudOps25/cloud-native-java-platform
         token: ${{ secrets.GITOPS_TOKEN }}
 
-    - name: Update values files
+    - name: Update values file
       shell: powershell
       run: |
         if ($env:GITHUB_REF -eq "refs/heads/dev") {
