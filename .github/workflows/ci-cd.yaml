@@ -69,10 +69,12 @@ jobs:
     #- name: Deploy To Kubernetes
     #  run: kubectl apply -f k8s/base/
 
-    - name: Install Helm
-      uses: azure/setup-helm@v4
-      with:
-        version: v3.14.0
+    - name: Install Helm (Windows)
+      shell: powershell
+      run: |
+        choco install kubernetes-helm -y
+        helm version
+
 
 
     - name: Deploy using Helm
