@@ -4,7 +4,7 @@ metadata:
   name: java-app
   namespace: java-app
 spec:
-  replicas: { { .Values.replicaCount } }
+  replicas: "{{ .Values.replicaCount }}"
   selector:
     matchLabels:
       app: java-app
