@@ -16,6 +16,10 @@ spec:
         app: java-app
 
     spec:
+      securityContext:        # 👈 Pod-level security context
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
       containers:
         - name: java-app
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
