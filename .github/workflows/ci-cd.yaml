@@ -69,11 +69,7 @@ jobs:
     #  run: kubectl apply -f k8s/base/
 
     - name: Deploy using Helm
-      run: |
-        helm upgrade --install java-app ./helm \
-        -n java-app \
-        --create-namespace \
-        -f helm/values.yaml    
+      run: helm upgrade --install java-app ./helm -n java-app --create-namespace -f helm/values.yaml    
 
     - name: Restart Deployment
       run: kubectl rollout restart deployment java-app -n java-app
