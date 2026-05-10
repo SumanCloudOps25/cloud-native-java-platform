@@ -67,11 +67,11 @@ jobs:
 
     - name: Run Trivy Helm Scan
       run: |
-        trivy config --severity HIGH,CRITICAL --exit-code 1 .helm/ 
+        trivy config --severity HIGH,CRITICAL --exit-code 1 helm/ 
 
     - name: Run Trivy Helm Templates Scan
       run: |
-        trivy config --severity HIGH,CRITICAL --exit-code 1 .helm/templates/
+        trivy config --severity HIGH,CRITICAL --exit-code 1 helm/templates/
     
     #
     #- name: Deploy To Kubernetes
