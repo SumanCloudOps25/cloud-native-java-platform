@@ -2,7 +2,7 @@ replicaCount: 3
 
 image:
   repository: cloud-native-java-app
-  tag: stable
+  tag: 
 
 env:
   APP_ENV: prod
