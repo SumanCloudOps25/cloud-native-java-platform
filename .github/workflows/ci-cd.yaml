@@ -79,21 +79,46 @@ jobs:
     #    choco install kubernetes-helm -y
     #    helm version
 
+    #ARGO CD STEPS
 
-    - name: Deploy to Dev
-      if: github.ref == 'refs/heads/dev'
-      run: |
-        helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-dev.yaml
+    - name: Checkout GitHub Repo
+      uses: actions/checkout@v4
+      with:
+        repository: SumanCloudOps25/cloud-native-java-platform
+        token: ${{ secrets.GITOPS_TOKEN }}
 
-    - name: Deploy to Prod
-      if: github.ref == 'refs/heads/main'
+    - name: Update values file
       run: |
-        helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-prod.yaml
+        if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+          sed -i "s|tag:.*|tag: $IMAGE_TAG|" helm/values-dev.yaml
+        else
+          sed -i "s|tag:.*|tag: $IMAGE_TAG|" helm/values-prod.yaml
+        fi
 
-    - name: Verify Helm Release
+    - name: Commit and Push Changes
       run: |
-        helm list -n java-app
-        helm status java-app -n java-app    
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add helm/values-*.yaml
+        git commit -m "Update image tag to $IMAGE_TAG"
+        git push
+
+    # HELM STEPS
+
+    #- name: Deploy to Dev
+    #  if: github.ref == 'refs/heads/dev'
+    #  run: |
+    #    helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-dev.yaml
+
+    #- name: Deploy to Prod
+    #  if: github.ref == 'refs/heads/main'
+    #  run: |
+    #    helm upgrade --install java-app ./helm -n java-app --create-namespace --set image.tag=${{ github.sha }} -f helm/values-prod.yaml
+
+    #- name: Verify Helm Release
+    #  run: |
+    #    helm list -n java-app
+    #    helm status java-app -n java-app    
 
     #- name: Restart Deployment
     #  run: kubectl rollout restart deployment java-app -n java-app
