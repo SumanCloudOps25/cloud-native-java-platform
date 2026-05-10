@@ -88,12 +88,15 @@ jobs:
         token: ${{ secrets.GITOPS_TOKEN }}
 
     - name: Update values file
+      shell: powershell
       run: |
-        if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-          sed -i "s|tag:.*|tag: $IMAGE_TAG|" helm/values-dev.yaml
-        else
-          sed -i "s|tag:.*|tag: $IMAGE_TAG|" helm/values-prod.yaml
-        fi
+        if ($env:GITHUB_REF -eq "refs/heads/dev") {
+          (Get-Content helm/values-dev.yaml) -replace 'tag:.*', "tag: $env:IMAGE_TAG" | Set-Content helm/values-dev.yaml
+        }
+        elseif ($env:GITHUB_REF -eq "refs/heads/main") {
+          (Get-Content helm/values-prod.yaml) -replace 'tag:.*', "tag: $env:IMAGE_TAG" | Set-Content helm/values-prod.yaml
+        }
+
 
     - name: Commit and Push Changes
       run: |
